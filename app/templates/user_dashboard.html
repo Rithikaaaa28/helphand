@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - HelpHand{% endblock %}
+
+{% block content %}
+<div class="px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="sm:flex sm:items-center">
+        <div class="sm:flex-auto">
+            <h1 class="text-2xl font-semibold text-gray-900">My Dashboard</h1>
+            <p class="mt-2 text-sm text-gray-700">Welcome back, {{ current_user.name }}! Here's what's happening with your tasks.</p>
+        </div>
+        <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+            <a href="{{ url_for('main.post_task') }}" 
+               class="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto">
+                <i class="fas fa-plus mr-2"></i>Post New Task
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-tasks text-2xl text-blue-600"></i>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">Total Tasks</dt>
+                        <dd class="text-lg font-medium text-gray-900">{{ tasks|length }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-clock text-2xl text-yellow-600"></i>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">Pending</dt>
+                        <dd class="text-lg font-medium text-gray-900">
+                            {{ tasks|selectattr("status", "equalto", "pending")|list|length }}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-user-check text-2xl text-blue-600"></i>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">In Progress</dt>
+                        <dd class="text-lg font-medium text-gray-900">
+                            {{ tasks|selectattr("status", "equalto", "assigned")|list|length }}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle text-2xl text-green-600"></i>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 truncate">Completed</dt>
+                        <dd class="text-lg font-medium text-gray-900">
+                            {{ tasks|selectattr("status", "equalto", "completed")|list|length }}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Tasks -->
+    <div class="mt-8">
+        <div class="sm:flex sm:items-center">
+            <div class="sm:flex-auto">
+                <h2 class="text-lg font-medium text-gray-900">Recent Tasks</h2>
+                <p class="mt-1 text-sm text-gray-500">A list of all your recent task requests</p>
+            </div>
+        </div>
+
+        <div class="mt-4 flex flex-col">
+            <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+                    <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-300">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Task</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Assigned To</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Created</th>
+                                    <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 bg-white">
+                                {% for task in tasks %}
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">{{ task.title }}</div>
+                                        <div class="text-sm text-gray-500">{{ task.description[:50] }}...</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+                                            {% if task.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                            {% elif task.status == 'assigned' %}bg-blue-100 text-blue-800
+                                            {% elif task.status == 'completed' %}bg-green-100 text-green-800
+                                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                            {{ task.status|title }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {% if task.assigned_volunteer %}
+                                            {{ task.assigned_volunteer.user_profile.name }}
+                                        {% else %}
+                                            <span class="text-gray-500">Not assigned</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ task.created_at.strftime('%b %d, %Y') }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <a href="{{ url_for('main.view_task', task_id=task.id) }}" 
+                                           class="text-blue-600 hover:text-blue-900">View</a>
+                                        {% if task.status == 'assigned' %}
+                                            <form method="POST" action="{{ url_for('main.complete_task', task_id=task.id) }}" class="inline ml-2">
+                                                <button type="submit" class="text-green-600 hover:text-green-900"
+                                                        onclick="return confirm('Mark this task as completed?')">
+                                                    Complete
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                        No tasks yet. <a href="{{ url_for('main.post_task') }}" class="text-blue-600 hover:text-blue-500">Post your first task</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mt-8 bg-blue-50 rounded-lg p-6">
+        <h3 class="text-lg font-medium text-blue-900 mb-4">Quick Actions</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <a href="{{ url_for('main.post_task') }}" 
+               class="flex items-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                <i class="fas fa-plus-circle text-blue-600 text-2xl mr-3"></i>
+                <div>
+                    <div class="font-medium text-gray-900">Post New Task</div>
+                    <div class="text-sm text-gray-500">Need help with something?</div>
+                </div>
+            </a>
+            <a href="{{ url_for('auth.register') }}?role=volunteer" 
+               class="flex items-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                <i class="fas fa-hands-helping text-blue-600 text-2xl mr-3"></i>
+                <div>
+                    <div class="font-medium text-gray-900">Become a Volunteer</div>
+                    <div class="text-sm text-gray-500">Help others in your community</div>
+                </div>
+            </a>
+            <a href="#" class="flex items-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                <i class="fas fa-chart-line text-blue-600 text-2xl mr-3"></i>
+                <div>
+                    <div class="font-medium text-gray-900">View Analytics</div>
+                    <div class="text-sm text-gray-500">Track your task history</div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

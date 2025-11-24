@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Submit Feedback - HelpHand{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-2xl">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Submit Feedback</h1>
+        
+        <!-- Task Details -->
+        <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+            <h2 class="text-xl font-semibold text-gray-700 mb-2">{{ task.title }}</h2>
+            <p class="text-gray-600 mb-2">{{ task.description }}</p>
+            <div class="flex items-center text-sm text-gray-500">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                <span>Volunteer: {{ task.assigned_volunteer.user_profile.name }}</span>
+            </div>
+        </div>
+        
+        <!-- Feedback Form -->
+        <form method="POST" action="{{ url_for('main.submit_feedback', task_id=task.id) }}">
+            <!-- Star Rating -->
+            <div class="mb-6">
+                <label class="block text-gray-700 font-medium mb-2">
+                    Rating <span class="text-red-500">*</span>
+                </label>
+                <div class="flex items-center space-x-2">
+                    {% for i in range(1, 6) %}
+                    <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" required class="hidden peer/star{{ i }}">
+                    <label for="star{{ i }}" class="cursor-pointer text-3xl text-gray-300 hover:text-yellow-400 peer-checked/star{{ i }}:text-yellow-400 transition-colors">
+                        ★
+                    </label>
+                    {% endfor %}
+                </div>
+                <p class="text-sm text-gray-500 mt-2">Click to rate (1 = Poor, 5 = Excellent)</p>
+            </div>
+            
+            <!-- Feedback Text -->
+            <div class="mb-6">
+                <label for="text" class="block text-gray-700 font-medium mb-2">
+                    Your Feedback
+                </label>
+                <textarea 
+                    id="text" 
+                    name="text" 
+                    rows="5" 
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Share your experience with this volunteer. Your feedback helps improve our community..."
+                ></textarea>
+                <p class="text-sm text-gray-500 mt-1">
+                    💡 Your feedback will be analyzed for sentiment to help us improve volunteer recommendations
+                </p>
+            </div>
+            
+            <!-- Submit Button -->
+            <div class="flex space-x-4">
+                <button 
+                    type="submit" 
+                    class="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                >
+                    Submit Feedback
+                </button>
+                <a 
+                    href="{{ url_for('main.dashboard') }}" 
+                    class="flex-1 bg-gray-200 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors font-medium text-center"
+                >
+                    Skip for Now
+                </a>
+            </div>
+        </form>
+        
+        <!-- Info Box -->
+        <div class="mt-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
+            <div class="flex items-start">
+                <svg class="w-5 h-5 text-blue-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                </svg>
+                <div>
+                    <h3 class="text-sm font-semibold text-blue-900 mb-1">Why Feedback Matters</h3>
+                    <p class="text-sm text-blue-800">
+                        Your feedback helps us:
+                    </p>
+                    <ul class="text-sm text-blue-800 list-disc list-inside mt-1">
+                        <li>Improve volunteer matching accuracy</li>
+                        <li>Maintain quality standards</li>
+                        <li>Help other users make better choices</li>
+                        <li>Recognize outstanding volunteers</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Enhanced star rating styling */
+    input[type="radio"]:checked ~ label {
+        color: #fbbf24;
+    }
+    
+    label:hover,
+    label:hover ~ label {
+        color: #fcd34d !important;
+    }
+</style>
+
+<script>
+    // Interactive star rating
+    document.addEventListener('DOMContentLoaded', function() {
+        const stars = document.querySelectorAll('label[for^="star"]');
+        
+        stars.forEach((star, index) => {
+            star.addEventListener('mouseenter', function() {
+                stars.forEach((s, i) => {
+                    if (i <= index) {
+                        s.style.color = '#fbbf24';
+                    } else {
+                        s.style.color = '#d1d5db';
+                    }
+                });
+            });
+        });
+        
+        document.querySelector('form').addEventListener('mouseleave', function() {
+            const checkedStar = document.querySelector('input[name="rating"]:checked');
+            if (checkedStar) {
+                const value = parseInt(checkedStar.value);
+                stars.forEach((s, i) => {
+                    if (i < value) {
+                        s.style.color = '#fbbf24';
+                    } else {
+                        s.style.color = '#d1d5db';
+                    }
+                });
+            } else {
+                stars.forEach(s => s.style.color = '#d1d5db');
+            }
+        });
+    });
+</script>
+{% endblock %}

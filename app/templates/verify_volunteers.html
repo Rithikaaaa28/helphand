@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Verify Volunteers - Admin{% endblock %}
+
+<!-- Template updated: Fixed hasattr Jinja2 error -->
+{% block content %}
+<div class="px-4 sm:px-6 lg:px-8">
+    <div class="sm:flex sm:items-center">
+        <div class="sm:flex-auto">
+            <h1 class="text-2xl font-semibold text-gray-900">Volunteer Verification</h1>
+            <p class="mt-2 text-sm text-gray-700">Review and verify volunteer applications with OCR-extracted document information.</p>
+        </div>
+    </div>
+
+    {% if volunteers %}
+    <div class="mt-8 space-y-6">
+        {% for volunteer in volunteers %}
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="px-4 py-5 sm:px-6">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">{{ volunteer.user_profile.name }}</h3>
+                        <p class="mt-1 max-w-2xl text-sm text-gray-500">{{ volunteer.user_profile.email }}</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <a href="{{ url_for('admin.approve_volunteer', volunteer_id=volunteer.id) }}" 
+                           class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                            <i class="fas fa-check mr-1"></i>Approve
+                        </a>
+                        <a href="{{ url_for('admin.reject_volunteer', volunteer_id=volunteer.id) }}" 
+                           class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                           onclick="return confirm('Are you sure you want to reject this volunteer?')">
+                            <i class="fas fa-times mr-1"></i>Reject
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-200">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+                    <!-- Volunteer Information -->
+                    <div>
+                        <h4 class="text-md font-medium text-gray-900 mb-3">Volunteer Information</h4>
+                        <dl class="space-y-2">
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Skills</dt>
+                                <dd class="text-sm text-gray-900">{{ volunteer.skills or 'Not provided' }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Location</dt>
+                                <dd class="text-sm text-gray-900">
+                                    Pincode: {{ volunteer.user_profile.pincode or 'Not provided' }}
+                                    {% if volunteer.user_profile.latitude and volunteer.user_profile.longitude %}
+                                    <br>GPS: {{ "%.4f, %.4f"|format(volunteer.user_profile.latitude, volunteer.user_profile.longitude) }}
+                                    {% endif %}
+                                </dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Registration Date</dt>
+                                <dd class="text-sm text-gray-900">{{ volunteer.created_at.strftime('%B %d, %Y at %I:%M %p') }}</dd>
+                            </div>
+                        </dl>
+                    </div>
+
+                    <!-- OCR Results -->
+                    <div>
+                        <h4 class="text-md font-medium text-gray-900 mb-3">Document Verification</h4>
+                        {% if volunteer.document_path %}
+                            <!-- Document Image -->
+                            <div class="mb-4">
+                                <img src="{{ url_for('static', filename='uploads/' + volunteer.document_path.split('uploads/')[-1]) }}" 
+                                     alt="ID Document" class="max-w-full h-48 object-contain border rounded"
+                                     onerror="this.src='{{ url_for('static', filename='uploads/placeholder.png') }}'; this.onerror=null;">
+                            </div>
+                            
+                            {% if volunteer.extracted_text %}
+                                <!-- Extracted Information -->
+                                <div class="bg-green-50 p-4 rounded-lg mb-4">
+                                    <h5 class="font-medium text-green-800 mb-2">✅ Document Text Extracted</h5>
+                                    <div class="bg-gray-50 p-3 rounded text-sm mt-2">
+                                        <p class="text-gray-700 whitespace-pre-wrap">{{ volunteer.extracted_text[:300] }}{% if volunteer.extracted_text|length > 300 %}...{% endif %}</p>
+                                    </div>
+                                </div>
+                            {% else %}
+                            <!-- No OCR Data -->
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <h5 class="font-medium text-blue-800 mb-2">📄 Document Uploaded</h5>
+                                <p class="text-blue-700 text-sm">Review the document image above for verification.</p>
+                            </div>
+                            {% endif %}
+                        {% else %}
+                        <div class="bg-yellow-50 p-4 rounded-lg">
+                            <h5 class="font-medium text-yellow-800 mb-2">⚠️ No Document Provided</h5>
+                            <p class="text-yellow-700 text-sm">Volunteer has not uploaded any verification document.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="mt-8 text-center">
+        <div class="bg-white shadow rounded-lg p-8">
+            <i class="fas fa-check-circle text-6xl text-green-500 mb-4"></i>
+            <h3 class="text-lg font-medium text-gray-900">All Caught Up!</h3>
+            <p class="mt-2 text-sm text-gray-500">No pending volunteer verifications at this time.</p>
+            <div class="mt-6">
+                <a href="{{ url_for('admin.dashboard') }}" 
+                   class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -41,9 +41,9 @@ def seed_data():
         name='Admin User',
         email='admin@helphand.com',
         role='admin',
-        pincode='110001',
-        latitude=28.6139,
-        longitude=77.2090,
+        pincode='560001',
+        latitude=12.9716,
+        longitude=77.5946,
         verified=True
     )
     admin.set_password('admin123')
@@ -54,9 +54,9 @@ def seed_data():
         name='John Doe',
         email='user@helphand.com',
         role='user',
-        pincode='110001',
-        latitude=28.6139,
-        longitude=77.2090
+        pincode='560001',
+        latitude=12.9716,
+        longitude=77.5946
     )
     user1.set_password('user123')
     db.session.add(user1)
@@ -66,9 +66,9 @@ def seed_data():
         name='Jane Smith',
         email='jane@helphand.com',
         role='user',
-        pincode='110002',
-        latitude=28.6239,
-        longitude=77.2190
+        pincode='560002',
+        latitude=12.9816,
+        longitude=77.6046
     )
     user2.set_password('user123')
     db.session.add(user2)
@@ -78,9 +78,9 @@ def seed_data():
         name='Ramesh Kumar',
         email='volunteer@helphand.com',
         role='volunteer',
-        pincode='110001',
-        latitude=28.6189,
-        longitude=77.2140,
+        pincode='560001',
+        latitude=12.9766,
+        longitude=77.5996,
         verified=True
     )
     volunteer1_user.set_password('volunteer123')
@@ -102,9 +102,9 @@ def seed_data():
         name='Priya Sharma',
         email='priya@helphand.com',
         role='volunteer',
-        pincode='110002',
-        latitude=28.6289,
-        longitude=77.2240,
+        pincode='560002',
+        latitude=12.9866,
+        longitude=77.6096,
         verified=True
     )
     volunteer2_user.set_password('volunteer123')
@@ -125,9 +125,9 @@ def seed_data():
         name='Amit Patel',
         email='amit@helphand.com',
         role='volunteer',
-        pincode='110001',
-        latitude=28.6339,
-        longitude=77.2290,
+        pincode='560001',
+        latitude=12.9916,
+        longitude=77.6146,
         verified=True
     )
     volunteer3_user.set_password('volunteer123')
@@ -148,9 +148,9 @@ def seed_data():
         name='Neha Gupta',
         email='neha@helphand.com',
         role='volunteer',
-        pincode='110003',
-        latitude=28.6389,
-        longitude=77.2340,
+        pincode='560003',
+        latitude=12.9966,
+        longitude=77.6196,
         verified=False
     )
     pending_vol_user.set_password('volunteer123')
@@ -174,9 +174,9 @@ def seed_data():
         title='Need help with bathroom plumbing',
         description='Leaking faucet in bathroom needs urgent repair. Water dripping constantly.',
         category='Home Repairs',
-        pincode='110001',
-        latitude=28.6139,
-        longitude=77.2090,
+        pincode='560001',
+        latitude=12.9716,
+        longitude=77.5946,
         status='pending',
         urgency='high'
     )
@@ -187,9 +187,9 @@ def seed_data():
         title='Math tutoring for 10th grade',
         description='Need math tutor for 10th grade student. Topics: algebra, geometry, trigonometry.',
         category='Education',
-        pincode='110001',
-        latitude=28.6139,
-        longitude=77.2090,
+        pincode='560001',
+        latitude=12.9716,
+        longitude=77.5946,
         status='pending',
         urgency='medium'
     )
@@ -200,9 +200,9 @@ def seed_data():
         title='Grocery shopping assistance',
         description='Need someone to help with weekly grocery shopping for elderly parent. Heavy lifting required.',
         category='Shopping',
-        pincode='110002',
-        latitude=28.6239,
-        longitude=77.2190,
+        pincode='560002',
+        latitude=12.9816,
+        longitude=77.6046,
         status='assigned',
         assigned_volunteer_id=volunteer3.id,
         urgency='low'
@@ -215,9 +215,9 @@ def seed_data():
         title='Website bug fixing',
         description='Need experienced developer to fix bugs in my small business website. PHP and MySQL knowledge required.',
         category='Professional Services',
-        pincode='110002',
-        latitude=28.6239,
-        longitude=77.2190,
+        pincode='560002',
+        latitude=12.9816,
+        longitude=77.6046,
         status='pending',
         is_commercial=True,
         payment_amount=2000.0,

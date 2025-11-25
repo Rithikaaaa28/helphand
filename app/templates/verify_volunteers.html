@@ -15,11 +15,21 @@
     {% if volunteers %}
     <div class="mt-8 space-y-6">
         {% for volunteer in volunteers %}
-        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-            <div class="px-4 py-5 sm:px-6">
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg {% if volunteer.premium_verified %}ring-2 ring-yellow-400{% endif %}">
+            <div class="px-4 py-5 sm:px-6 {% if volunteer.premium_verified %}bg-gradient-to-r from-yellow-50 to-white{% endif %}">
                 <div class="flex justify-between items-start">
                     <div>
-                        <h3 class="text-lg leading-6 font-medium text-gray-900">{{ volunteer.user_profile.name }}</h3>
+                        <div class="flex items-center space-x-2">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">{{ volunteer.user_profile.name }}</h3>
+                            {% if volunteer.premium_verified %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                <svg class="mr-1 h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                                PREMIUM - Priority Verification
+                            </span>
+                            {% endif %}
+                        </div>
                         <p class="mt-1 max-w-2xl text-sm text-gray-500">{{ volunteer.user_profile.email }}</p>
                     </div>
                     <div class="flex space-x-2">
@@ -68,9 +78,9 @@
                         {% if volunteer.document_path %}
                             <!-- Document Image -->
                             <div class="mb-4">
-                                <img src="{{ url_for('static', filename='uploads/' + volunteer.document_path.split('uploads/')[-1]) }}" 
+                                <img src="{{ url_for('static', filename=volunteer.document_path) }}" 
                                      alt="ID Document" class="max-w-full h-48 object-contain border rounded"
-                                     onerror="this.src='{{ url_for('static', filename='uploads/placeholder.png') }}'; this.onerror=null;">
+                                     onerror="this.parentElement.innerHTML='<div class=\'bg-gray-100 p-4 rounded text-center text-gray-500\'>Image could not be loaded</div>';">
                             </div>
                             
                             {% if volunteer.extracted_text %}

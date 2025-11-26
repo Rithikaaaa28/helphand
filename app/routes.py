@@ -11,15 +11,21 @@ def allowed_file(filename):
     """Check if file extension is allowed"""
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in current_app.config.get('ALLOWED_EXTENSIONS', {'png', 'jpg', 'jpeg', 'gif'})
-# Import AI service with fallback - temporarily disabled ML service for faster startup
+# Import AI service with TF-IDF and ML capabilities
 ai_service = None
 try:
-    from app.services.simple_ai import SimpleAIMatchingService
-    ai_service = SimpleAIMatchingService()
-    print("Using simple AI matching service")
+    from app.services.ai_matching import AIMatchingService
+    ai_service = AIMatchingService()
+    print("✅ Using AI matching service with TF-IDF and Cosine Similarity")
 except ImportError as e:
-    print(f"Warning: No AI service available: {e}")
-    ai_service = None
+    print(f"⚠️  ML service unavailable, falling back to simple matching: {e}")
+    try:
+        from app.services.simple_ai import SimpleAIMatchingService
+        ai_service = SimpleAIMatchingService()
+        print("Using simple keyword-based matching service")
+    except ImportError:
+        print(f"Warning: No AI service available")
+        ai_service = None
 
 # Create blueprints
 auth_bp = Blueprint('auth', __name__)

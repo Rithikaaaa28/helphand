@@ -514,6 +514,11 @@ def verify_volunteers():
                     # New format - needs static folder prefix
                     absolute_path = os.path.join(current_app.static_folder, doc_path)
                 
+                print(f"DEBUG: Processing volunteer {volunteer.id}")
+                print(f"DEBUG: Original path: {doc_path}")
+                print(f"DEBUG: Absolute path: {absolute_path}")
+                print(f"DEBUG: File exists: {os.path.exists(absolute_path)}")
+                
                 # Use comprehensive document verification
                 verification_result = ocr_service.verify_volunteer_document(
                     absolute_path, 

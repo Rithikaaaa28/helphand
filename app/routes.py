@@ -504,9 +504,12 @@ def verify_volunteers():
     for volunteer in pending_volunteers:
         if volunteer.document_path and not volunteer.extracted_text:
             try:
+                # Convert relative path to absolute path for OCR
+                absolute_path = os.path.join(current_app.static_folder, volunteer.document_path)
+                
                 # Use comprehensive document verification
                 verification_result = ocr_service.verify_volunteer_document(
-                    volunteer.document_path, 
+                    absolute_path, 
                     volunteer.user_profile.name
                 )
                 
@@ -570,9 +573,12 @@ def api_verify_document(volunteer_id):
         return jsonify({'error': 'No document uploaded'}), 400
     
     try:
+        # Convert relative path to absolute path for OCR
+        absolute_path = os.path.join(current_app.static_folder, volunteer.document_path)
+        
         # Perform OCR verification
         verification_result = ocr_service.verify_volunteer_document(
-            volunteer.document_path,
+            absolute_path,
             volunteer.user_profile.name
         )
         

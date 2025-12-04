@@ -505,7 +505,14 @@ def verify_volunteers():
         if volunteer.document_path and not volunteer.extracted_text:
             try:
                 # Convert relative path to absolute path for OCR
-                absolute_path = os.path.join(current_app.static_folder, volunteer.document_path)
+                # Handle both old format (app/static/uploads/...) and new format (uploads/...)
+                doc_path = volunteer.document_path
+                if doc_path.startswith('app/static/'):
+                    # Old format - already has app/static prefix
+                    absolute_path = os.path.join(os.getcwd(), doc_path)
+                else:
+                    # New format - needs static folder prefix
+                    absolute_path = os.path.join(current_app.static_folder, doc_path)
                 
                 # Use comprehensive document verification
                 verification_result = ocr_service.verify_volunteer_document(
@@ -574,7 +581,14 @@ def api_verify_document(volunteer_id):
     
     try:
         # Convert relative path to absolute path for OCR
-        absolute_path = os.path.join(current_app.static_folder, volunteer.document_path)
+        # Handle both old format (app/static/uploads/...) and new format (uploads/...)
+        doc_path = volunteer.document_path
+        if doc_path.startswith('app/static/'):
+            # Old format - already has app/static prefix
+            absolute_path = os.path.join(os.getcwd(), doc_path)
+        else:
+            # New format - needs static folder prefix
+            absolute_path = os.path.join(current_app.static_folder, doc_path)
         
         # Perform OCR verification
         verification_result = ocr_service.verify_volunteer_document(

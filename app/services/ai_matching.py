@@ -14,6 +14,7 @@ try:
     from nltk.sentiment import SentimentIntensityAnalyzer
     from nltk.stem import PorterStemmer
     import nltk
+    import re
     try:
         nltk.data.find('sentiment/vader_lexicon.zip')
     except LookupError:
@@ -38,7 +39,9 @@ class AIMatchingService:
             # Use custom analyzer with stemming for better word matching
             if self.stemmer:
                 def stemming_analyzer(text):
-                    words = text.lower().split()
+                    # Remove punctuation first, then split and stem
+                    text = re.sub(r'[^\w\s]', ' ', text.lower())
+                    words = text.split()
                     return [self.stemmer.stem(word) for word in words if len(word) > 2]
                 self.vectorizer = TfidfVectorizer(
                     analyzer=stemming_analyzer,

@@ -12,6 +12,7 @@ except ImportError:
 
 try:
     from nltk.sentiment import SentimentIntensityAnalyzer
+    from nltk.stem import PorterStemmer
     import nltk
     try:
         nltk.data.find('sentiment/vader_lexicon.zip')
@@ -32,8 +33,19 @@ except ImportError:
 class AIMatchingService:
     def __init__(self):
         self.vectorizer = None
+        self.stemmer = PorterStemmer() if NLTK_AVAILABLE else None
         if SKLEARN_AVAILABLE:
-            self.vectorizer = TfidfVectorizer(stop_words='english', max_features=1000)
+            # Use custom analyzer with stemming for better word matching
+            if self.stemmer:
+                def stemming_analyzer(text):
+                    words = text.lower().split()
+                    return [self.stemmer.stem(word) for word in words if len(word) > 2]
+                self.vectorizer = TfidfVectorizer(
+                    analyzer=stemming_analyzer,
+                    max_features=1000
+                )
+            else:
+                self.vectorizer = TfidfVectorizer(stop_words='english', max_features=1000)
     
     def match_volunteers_to_task(self, task_description: str, volunteers: List[Dict], 
                                task_lat: float = None, task_lon: float = None) -> List[Dict]:
@@ -75,8 +87,8 @@ class AIMatchingService:
                     task_lat, task_lon
                 )
                 
-                # Weighted final score: 60% similarity + 40% proximity
-                final_score = (0.6 * similarity_score) + (0.4 * proximity_score)
+                # Weighted final score: 85% similarity + 15% proximity (strongly prioritize skill match)
+                final_score = (0.85 * similarity_score) + (0.15 * proximity_score)
                 volunteer['match_score'] = final_score
                 volunteer['similarity_score'] = similarity_score
                 volunteer['proximity_score'] = proximity_score
@@ -168,9 +180,14 @@ class AIMatchingService:
                 'premium_verified': vol.premium_verified
             })
         
+        # Combine title and description for better matching
+        task_text = f"{task.title} {task.description}"
+        if task.category:
+            task_text += f" {task.category}"
+        
         # Perform matching
         matched = self.match_volunteers_to_task(
-            task.description,
+            task_text,
             volunteer_data,
             task.latitude,
             task.longitude

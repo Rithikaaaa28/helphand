@@ -20,23 +20,43 @@ class OCRService:
                 pytesseract.pytesseract.tesseract_cmd = env_path
     
     def preprocess_image(self, image_path):
-        """Preprocess image for better OCR accuracy"""
+        """Preprocess image for better OCR accuracy with multiple techniques"""
         try:
             # Read image with OpenCV
             img = cv2.imread(image_path)
+            if img is None:
+                return image_path
             
             # Convert to grayscale
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             
-            # Apply thresholding to make text clearer
-            threshold = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+            # Resize if too small or too large (improves OCR accuracy)
+            height, width = gray.shape
+            target_height = 2000  # Larger size for better OCR
+            if height < target_height:
+                scale = target_height / height
+                gray = cv2.resize(gray, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
+            elif height > 3000:
+                scale = 3000 / height
+                gray = cv2.resize(gray, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
             
             # Denoise
-            denoised = cv2.fastNlMeansDenoising(threshold, None, 10, 7, 21)
+            denoised = cv2.fastNlMeansDenoising(gray, None, 10, 7, 21)
             
-            # Save preprocessed image temporarily
+            # Apply CLAHE (Contrast Limited Adaptive Histogram Equalization)
+            clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+            enhanced = clahe.apply(denoised)
+            
+            # Apply binary thresholding
+            _, binary = cv2.threshold(enhanced, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+            
+            # Dilation to make text bolder
+            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2,2))
+            dilated = cv2.dilate(binary, kernel, iterations=1)
+            
+            # Save the preprocessed version
             temp_path = image_path.replace('.', '_preprocessed.')
-            cv2.imwrite(temp_path, denoised)
+            cv2.imwrite(temp_path, dilated)
             
             return temp_path
         except Exception as e:
@@ -44,7 +64,7 @@ class OCRService:
             return image_path  # Return original if preprocessing fails
     
     def extract_text_from_image(self, image_path):
-        """Extract text from uploaded ID document"""
+        """Extract text from uploaded ID document with improved OCR"""
         try:
             # Preprocess image for better OCR
             preprocessed_path = self.preprocess_image(image_path)
@@ -52,9 +72,24 @@ class OCRService:
             # Open and process image
             image = Image.open(preprocessed_path)
             
-            # Extract text using OCR with custom config for better accuracy
-            custom_config = r'--oem 3 --psm 6'
-            extracted_text = pytesseract.image_to_string(image, lang='eng', config=custom_config)
+            # Use multiple Tesseract configurations and combine results
+            # PSM modes: 3=auto, 6=uniform block, 11=sparse text, 4=single column
+            configs = [
+                '--oem 3 --psm 6',  # Uniform text block (best for ID cards)
+                '--oem 3 --psm 3',  # Fully automatic page segmentation
+            ]
+            
+            all_text = []
+            for config in configs:
+                try:
+                    text = pytesseract.image_to_string(image, lang='eng', config=config)
+                    if text.strip():
+                        all_text.append(text)
+                except Exception:
+                    continue
+            
+            # Use the longest result (usually most complete)
+            extracted_text = max(all_text, key=len, default="") if all_text else ""
             
             # Clean up temporary preprocessed image
             if preprocessed_path != image_path and os.path.exists(preprocessed_path):
@@ -63,8 +98,8 @@ class OCRService:
             # Clean and process text
             cleaned_text = self._clean_extracted_text(extracted_text)
             
-            # Extract specific information
-            extracted_info = self._parse_id_info(cleaned_text)
+            # Extract specific information (use raw text to preserve line structure)
+            extracted_info = self._parse_id_info(extracted_text)
             
             return {
                 'success': True,
@@ -110,24 +145,12 @@ class OCRService:
         return cleaned
     
     def _parse_id_info(self, text):
-        """Parse specific information from ID documents"""
+        """Parse specific information from ID documents with improved name extraction"""
         info = {}
         text_upper = text.upper()
+        lines = [line.strip() for line in text.splitlines() if line.strip()]
         
-        # Try to extract name patterns
-        name_patterns = [
-            r'NAME[:\s]+([A-Z\s]+)',
-            r'HOLDER[:\s]+([A-Z\s]+)',
-            r'([A-Z]{2,}\s+[A-Z]{2,}(?:\s+[A-Z]{2,})?)'
-        ]
-        
-        for pattern in name_patterns:
-            match = re.search(pattern, text_upper)
-            if match:
-                info['name'] = match.group(1).strip()
-                break
-        
-        # Try to extract ID numbers (Aadhaar, PAN, etc.)
+        # Try to extract ID numbers first (helps identify document type)
         id_patterns = {
             'aadhaar': r'\b\d{4}\s?\d{4}\s?\d{4}\b',
             'pan': r'\b[A-Z]{5}\d{4}[A-Z]\b',
@@ -140,6 +163,57 @@ class OCRService:
                 info['id_number'] = match.group(0)
                 info['id_type'] = id_type
                 break
+        
+        # Improved name extraction strategies
+        name_found = False
+        
+        # Strategy 1: Look for explicit "NAME:" patterns
+        name_patterns = [
+            r'NAME[:\s]+([A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+)*)',
+            r'HOLDER[:\s]+([A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+)*)',
+        ]
+        
+        for pattern in name_patterns:
+            match = re.search(pattern, text_upper)
+            if match:
+                potential_name = match.group(1).strip()
+                # Clean up the name
+                potential_name = re.sub(r'\s+', ' ', potential_name)
+                if len(potential_name.split()) >= 1 and len(potential_name) > 3:
+                    info['name'] = potential_name
+                    name_found = True
+                    break
+        
+        # Strategy 2: If no explicit name found, look for capitalized words on their own line
+        # (names are usually prominent in ID cards)
+        if not name_found:
+            for i, line in enumerate(lines[:15]):  # Check first 15 lines
+                # Clean up the line - remove common symbols
+                line_clean = re.sub(r'[—_\-.,;:\'\"]+', ' ', line).strip()
+                words = line_clean.split()
+                
+                # Look for lines with 1-4 words that look like names (allow single names too)
+                if 1 <= len(words) <= 4:
+                    # Check if words look like a name (start with uppercase, mostly alphabetic, at least 3 chars)
+                    valid_words = []
+                    for word in words:
+                        # Word should be mostly alphabetic, at least 3 chars, start with uppercase
+                        if (len(word) >= 3 and 
+                            word[0].isupper() and 
+                            sum(c.isalpha() for c in word) >= len(word) * 0.8):
+                            valid_words.append(word)
+                    
+                    # If we have 1-4 valid name-like words (accept single names)
+                    if 1 <= len(valid_words) <= 4:
+                        potential_name = ' '.join(valid_words).upper()
+                        # Exclude common headers/words and short garbled text
+                        excluded = ['GOVERNMENT', 'INDIA', 'REPUBLIC', 'UNIQUE', 'IDENTIFICATION',
+                                  'AUTHORITY', 'AADHAAR', 'CARD', 'GRILL', 'OVERNMENT', 'RIE', 'FOC']
+                        
+                        if not any(exc in potential_name for exc in excluded):
+                            info['name'] = potential_name
+                            name_found = True
+                            break
         
         # Try to extract date of birth
         dob_patterns = [

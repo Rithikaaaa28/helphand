@@ -85,10 +85,16 @@
                             
                             {% if volunteer.extracted_text %}
                                 <!-- Extracted Information -->
-                                <div class="bg-green-50 p-4 rounded-lg mb-4">
-                                    <h5 class="font-medium text-green-800 mb-2">✅ Document Text Extracted</h5>
-                                    <div class="bg-gray-50 p-3 rounded text-sm mt-2">
-                                        <p class="text-gray-700 whitespace-pre-wrap">{{ volunteer.extracted_text[:300] }}{% if volunteer.extracted_text|length > 300 %}...{% endif %}</p>
+                                <div class="{% if '✅ VERIFIED' in volunteer.extracted_text %}bg-green-50{% else %}bg-yellow-50{% endif %} p-4 rounded-lg mb-4">
+                                    <h5 class="font-medium {% if '✅ VERIFIED' in volunteer.extracted_text %}text-green-800{% else %}text-yellow-800{% endif %} mb-2">
+                                        {% if '✅ VERIFIED' in volunteer.extracted_text %}
+                                        ✅ OCR Verification Passed
+                                        {% else %}
+                                        ⚠️ OCR Verification - Manual Review Needed
+                                        {% endif %}
+                                    </h5>
+                                    <div class="bg-white p-3 rounded border text-sm mt-2">
+                                        <pre class="text-gray-700 font-mono text-xs whitespace-pre-wrap">{{ volunteer.extracted_text }}</pre>
                                     </div>
                                 </div>
                             {% else %}

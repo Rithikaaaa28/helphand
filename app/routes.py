@@ -525,13 +525,24 @@ def verify_volunteers():
                     volunteer.user_profile.name
                 )
                 
-                if verification_result.get('verified'):
-                    volunteer.extracted_text = verification_result.get('extracted_info', {}).get('name', '')
-                    # Add verification metadata
-                    volunteer.verification_notes = f"Auto-verified (Score: {verification_result.get('match_score', 0):.2f})"
-                else:
-                    volunteer.extracted_text = verification_result.get('reason', 'Verification failed')
-                    volunteer.verification_notes = f"Needs manual review: {verification_result.get('reason', 'Unknown')}"
+                # Build extracted text display with all info
+                extracted_info = verification_result.get('extracted_info', {})
+                extracted_display = f"📄 OCR Extraction Results:\n\n"
+                extracted_display += f"Registered Name: {volunteer.user_profile.name}\n"
+                extracted_display += f"Extracted Name: {extracted_info.get('name', '❌ Could not extract name')}\n"
+                if 'id_type' in extracted_info:
+                    extracted_display += f"Document Type: {extracted_info['id_type'].upper()}\n"
+                if 'id_number' in extracted_info:
+                    extracted_display += f"ID Number: {extracted_info['id_number']}\n"
+                extracted_display += f"\nMatch Score: {verification_result.get('match_score', 0):.0%}\n"
+                extracted_display += f"Status: {'✅ VERIFIED' if verification_result.get('verified') else '⚠️ NEEDS REVIEW'}\n"
+                extracted_display += f"Reason: {verification_result.get('reason', 'Unknown')}\n\n"
+                
+                # Add tip if name not found
+                if not extracted_info.get('name'):
+                    extracted_display += "\n💡 Tip: Upload a clearer, well-lit photo of the ID for better results."
+                
+                volunteer.extracted_text = extracted_display
                 
                 db.session.commit()
             except Exception as e:

@@ -26,15 +26,16 @@
                 <label class="block text-gray-700 font-medium mb-2">
                     Rating <span class="text-red-500">*</span>
                 </label>
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-2" id="star-rating">
                     {% for i in range(1, 6) %}
-                    <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" required class="hidden peer/star{{ i }}">
-                    <label for="star{{ i }}" class="cursor-pointer text-3xl text-gray-300 hover:text-yellow-400 peer-checked/star{{ i }}:text-yellow-400 transition-colors">
+                    <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" required class="hidden">
+                    <label for="star{{ i }}" class="cursor-pointer text-3xl text-gray-300 hover:text-yellow-400 transition-colors star-label" data-rating="{{ i }}">
                         ★
                     </label>
                     {% endfor %}
                 </div>
                 <p class="text-sm text-gray-500 mt-2">Click to rate (1 = Poor, 5 = Excellent)</p>
+                <p id="rating-error" class="text-sm text-red-500 mt-1 hidden">Please select a rating</p>
             </div>
             
             <!-- Feedback Text -->
@@ -58,7 +59,8 @@
             <div class="flex space-x-4">
                 <button 
                     type="submit" 
-                    class="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                    id="submit-btn"
+                    class="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                     Submit Feedback
                 </button>
@@ -96,48 +98,76 @@
 
 <style>
     /* Enhanced star rating styling */
-    input[type="radio"]:checked ~ label {
-        color: #fbbf24;
-    }
-    
-    label:hover,
-    label:hover ~ label {
-        color: #fcd34d !important;
+    .star-label.active {
+        color: #fbbf24 !important;
     }
 </style>
 
 <script>
-    // Interactive star rating
+    // Interactive star rating with proper feedback
     document.addEventListener('DOMContentLoaded', function() {
-        const stars = document.querySelectorAll('label[for^="star"]');
+        const stars = document.querySelectorAll('.star-label');
+        const ratingInputs = document.querySelectorAll('input[name="rating"]');
+        const form = document.querySelector('form');
+        const ratingError = document.getElementById('rating-error');
+        let selectedRating = 0;
         
+        // Star click handler
         stars.forEach((star, index) => {
+            star.addEventListener('click', function(e) {
+                e.preventDefault();
+                const rating = parseInt(this.getAttribute('data-rating'));
+                selectedRating = rating;
+                
+                // Update radio button
+                ratingInputs[index].checked = true;
+                
+                // Update star colors
+                updateStarDisplay(rating);
+                
+                // Hide error if shown
+                ratingError.classList.add('hidden');
+            });
+            
+            // Hover effect
             star.addEventListener('mouseenter', function() {
-                stars.forEach((s, i) => {
-                    if (i <= index) {
-                        s.style.color = '#fbbf24';
-                    } else {
-                        s.style.color = '#d1d5db';
-                    }
-                });
+                const rating = parseInt(this.getAttribute('data-rating'));
+                updateStarDisplay(rating);
             });
         });
         
-        document.querySelector('form').addEventListener('mouseleave', function() {
-            const checkedStar = document.querySelector('input[name="rating"]:checked');
-            if (checkedStar) {
-                const value = parseInt(checkedStar.value);
-                stars.forEach((s, i) => {
-                    if (i < value) {
-                        s.style.color = '#fbbf24';
-                    } else {
-                        s.style.color = '#d1d5db';
-                    }
-                });
-            } else {
-                stars.forEach(s => s.style.color = '#d1d5db');
-            }
+        // Reset stars on mouse leave
+        const starContainer = document.getElementById('star-rating');
+        starContainer.addEventListener('mouseleave', function() {
+            updateStarDisplay(selectedRating);
         });
+        
+        // Form submission validation
+        form.addEventListener('submit', function(e) {
+            if (selectedRating === 0) {
+                e.preventDefault();
+                ratingError.classList.remove('hidden');
+                document.getElementById('star-rating').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return false;
+            }
+            
+            // Disable submit button and show loading state
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+        });
+        
+        function updateStarDisplay(rating) {
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                    star.style.color = '#fbbf24';
+                } else {
+                    star.classList.remove('active');
+                    star.style.color = '#d1d5db';
+                }
+            });
+        }
     });
 </script>
 {% endblock %}

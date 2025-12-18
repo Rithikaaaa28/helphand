@@ -359,6 +359,12 @@ def setup_profile():
     
     if request.method == 'POST':
         skills = request.form['skills']
+        additional_skills = request.form.get('additional_skills', '').strip()
+        
+        # Combine selected skills with additional skills
+        if additional_skills:
+            skills = f"{skills}, {additional_skills}"
+        
         premium_verification = request.form.get('premium_verification') == 'on'
         
         # Handle file upload

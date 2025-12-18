@@ -12,12 +12,335 @@
 
             <form method="POST" action="{{ url_for('volunteer.setup_profile') }}" enctype="multipart/form-data" class="space-y-6">
                 <div>
-                    <label for="skills" class="block text-sm font-medium text-gray-700">Skills & Services</label>
-                    <textarea id="skills" name="skills" rows="4" required
-                              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                              placeholder="Describe your skills and the types of help you can provide (e.g., home repairs, grocery shopping, elderly care, tutoring, pet sitting, etc.)"></textarea>
-                    <p class="mt-2 text-sm text-gray-500">Be specific about your abilities and experience. This helps our AI match you with suitable tasks.</p>
+                    <label class="block text-sm font-medium text-gray-700 mb-4">
+                        <i class="fas fa-briefcase mr-2"></i>Select Your Skills & Services
+                    </label>
+                    <p class="text-sm text-gray-500 mb-4">Choose the areas where you can help. Select all that apply.</p>
+                    
+                    <!-- Skills Grid -->
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3" id="skills-grid">
+                        <!-- Home & Maintenance -->
+                        <div class="skill-card">
+                            <input type="checkbox" id="skill-home-repairs" name="skills[]" value="Home repairs" class="skill-checkbox">
+                            <label for="skill-home-repairs" class="skill-label">
+                                <div class="skill-icon">🔧</div>
+                                <div class="skill-name">Home Repairs</div>
+                            </label>
+                        </div>
+                        
+                        <div class="skill-card">
+                            <input type="checkbox" id="skill-plumbing" name="skills[]" value="Plumbing" class="skill-checkbox">
+                            <label for="skill-plumbing" class="skill-label">
+                                <div class="skill-icon">🚰</div>
+                                <div class="skill-name">Plumbing</div>
+                            </label>
+                        </div>
+                        
+                        <div class="skill-card">
+                            <input type="checkbox" id="skill-electrical" name="skills[]" value="Electrical work" class="skill-checkbox">
+                            <label for="skill-electrical" class="skill-label">
+                                <div class="skill-icon">💡</div>
+                                <div class="skill-name">Electrical</div>
+                            </label>
+                        </div>
+                        
+                        <div class="skill-card">
+                            <input type="checkbox" id="skill-painting" name="skills[]" value="Painting" class="skill-checkbox">
+                            <label for="skill-painting" class="skill-label">
+                                <div class="skill-icon">🎨</div>
+                                <div class="skill-name">Painting</div>
+                            </label>
+                        </div>
+                        
+                        <div class="skill-card">
+                            <input type="checkbox" id="skill-carpentry" name="skills[]" value="Carpentry" class="skill-checkbox">
+                            <label for="skill-carpentry" class="skill-label">
+                                <div class="skill-icon">🪚</div>
+                                <div class="skill-name">Carpentry</div>
+                            </label>
+                        </div>
+                        
+                        <div class="skill-card">
+                            <input type="checkbox" id="skill-gardening" name="skills[]" value="Gardening" class="skill-checkbox">
+                            <label for="skill-gardening" class="skill-label">
+                                <div class="skill-icon">🌱</div>
+                                <div class="skill-name">Gardening</div>
+                            </label>
+                        </div>
+                        
+                        <!-- Household Services -->
+                        <div class="skill-card">
+                            <input type="checkbox" id="skill-cleaning" name="skills[]" value="House cleaning" class="skill-checkbox">
+                            <label for="skill-cleaning" class="skill-label">
+                                <div class="skill-icon">🧹</div>
+                                <div class="skill-name">Cleaning</div>
+                            </label>
+                        </div>
+                        
+                        <div class="skill-card">
+                            <input type="checkbox" id="skill-cooking" name="skills[]" value="Cooking" class="skill-checkbox">
+                            <label for="skill-cooking" class="skill-label">
+                                <div class="skill-icon">👨‍🍳</div>
+                                <div class="skill-name">Cooking</div>
+                            </label>
+                        </div>
+                        
+                        <div class="skill-card">
+                            <input type="checkbox" id="skill-laundry" name="skills[]" value="Laundry" class="skill-checkbox">
+                            <label for="skill-laundry" class="skill-label">
+                                <div class="skill-icon">🧺</div>
+                                <div class="skill-name">Laundry</div>
+                            </label>
+                        </div>
+                        
+                        <!-- Shopping & Errands -->
+                        <div class="skill-card">
+                            <input type="checkbox" id="skill-grocery" name="skills[]" value="Grocery shopping" class="skill-checkbox">
+                            <label for="skill-grocery" class="skill-label">
+                                <div class="skill-icon">🛒</div>
+                                <div class="skill-name">Grocery Shopping</div>
+                            </label>
+                        </div>
+                        
+                        <div class="skill-card">
+                            <input type="checkbox" id="skill-errands" name="skills[]" value="Running errands" class="skill-checkbox">
+                            <label for="skill-errands" class="skill-label">
+                                <div class="skill-icon">🏃</div>
+                                <div class="skill-name">Errands</div>
+                            </label>
+                        </div>
+                        
+                        <div class="skill-card">
+                            <input type="checkbox" id="skill-delivery" name="skills[]" value="Delivery services" class="skill-checkbox">
+                            <label for="skill-delivery" class="skill-label">
+                                <div class="skill-icon">📦</div>
+                                <div class="skill-name">Delivery</div>
+                            </label>
+                        </div>
+                        
+                        <!-- Care Services -->
+                        <div class="skill-card">
+                            <input type="checkbox" id="skill-elderly" name="skills[]" value="Elderly care" class="skill-checkbox">
+                            <label for="skill-elderly" class="skill-label">
+                                <div class="skill-icon">👴</div>
+                                <div class="skill-name">Elderly Care</div>
+                            </label>
+                        </div>
+                        
+                        <div class="skill-card">
+                            <input type="checkbox" id="skill-childcare" name="skills[]" value="Child care" class="skill-checkbox">
+                            <label for="skill-childcare" class="skill-label">
+                                <div class="skill-icon">👶</div>
+                                <div class="skill-name">Child Care</div>
+                            </label>
+                        </div>
+                        
+                        <div class="skill-card">
+                            <input type="checkbox" id="skill-pet" name="skills[]" value="Pet care" class="skill-checkbox">
+                            <label for="skill-pet" class="skill-label">
+                                <div class="skill-icon">🐕</div>
+                                <div class="skill-name">Pet Care</div>
+                            </label>
+                        </div>
+                        
+                        <div class="skill-card">
+                            <input type="checkbox" id="skill-companionship" name="skills[]" value="Companionship" class="skill-checkbox">
+                            <label for="skill-companionship" class="skill-label">
+                                <div class="skill-icon">🤝</div>
+                                <div class="skill-name">Companionship</div>
+                            </label>
+                        </div>
+                        
+                        <!-- Education & Technology -->
+                        <div class="skill-card">
+                            <input type="checkbox" id="skill-tutoring" name="skills[]" value="Tutoring" class="skill-checkbox">
+                            <label for="skill-tutoring" class="skill-label">
+                                <div class="skill-icon">📚</div>
+                                <div class="skill-name">Tutoring</div>
+                            </label>
+                        </div>
+                        
+                        <div class="skill-card">
+                            <input type="checkbox" id="skill-computer" name="skills[]" value="Computer help" class="skill-checkbox">
+                            <label for="skill-computer" class="skill-label">
+                                <div class="skill-icon">💻</div>
+                                <div class="skill-name">Computer Help</div>
+                            </label>
+                        </div>
+                        
+                        <div class="skill-card">
+                            <input type="checkbox" id="skill-phone" name="skills[]" value="Phone/tech support" class="skill-checkbox">
+                            <label for="skill-phone" class="skill-label">
+                                <div class="skill-icon">📱</div>
+                                <div class="skill-name">Tech Support</div>
+                            </label>
+                        </div>
+                        
+                        <!-- Transportation -->
+                        <div class="skill-card">
+                            <input type="checkbox" id="skill-driving" name="skills[]" value="Driving/transportation" class="skill-checkbox">
+                            <label for="skill-driving" class="skill-label">
+                                <div class="skill-icon">🚗</div>
+                                <div class="skill-name">Transportation</div>
+                            </label>
+                        </div>
+                        
+                        <div class="skill-card">
+                            <input type="checkbox" id="skill-moving" name="skills[]" value="Moving assistance" class="skill-checkbox">
+                            <label for="skill-moving" class="skill-label">
+                                <div class="skill-icon">📦</div>
+                                <div class="skill-name">Moving Help</div>
+                            </label>
+                        </div>
+                        
+                        <!-- Professional Services -->
+                        <div class="skill-card">
+                            <input type="checkbox" id="skill-admin" name="skills[]" value="Administrative tasks" class="skill-checkbox">
+                            <label for="skill-admin" class="skill-label">
+                                <div class="skill-icon">📋</div>
+                                <div class="skill-name">Admin Tasks</div>
+                            </label>
+                        </div>
+                        
+                        <div class="skill-card">
+                            <input type="checkbox" id="skill-translation" name="skills[]" value="Translation" class="skill-checkbox">
+                            <label for="skill-translation" class="skill-label">
+                                <div class="skill-icon">🌐</div>
+                                <div class="skill-name">Translation</div>
+                            </label>
+                        </div>
+                        
+                        <div class="skill-card">
+                            <input type="checkbox" id="skill-photography" name="skills[]" value="Photography" class="skill-checkbox">
+                            <label for="skill-photography" class="skill-label">
+                                <div class="skill-icon">📷</div>
+                                <div class="skill-name">Photography</div>
+                            </label>
+                        </div>
+                        
+                        <!-- Other -->
+                        <div class="skill-card">
+                            <input type="checkbox" id="skill-other" name="skills[]" value="Other services" class="skill-checkbox">
+                            <label for="skill-other" class="skill-label">
+                                <div class="skill-icon">✨</div>
+                                <div class="skill-name">Other</div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Hidden input to store selected skills as comma-separated string -->
+                    <input type="hidden" id="skills" name="skills" required>
+                    
+                    <!-- Additional skills textarea (optional) -->
+                    <div class="mt-4">
+                        <label for="additional-skills" class="block text-xs font-medium text-gray-600 mb-2">
+                            Additional Details (Optional)
+                        </label>
+                        <textarea id="additional-skills" name="additional_skills" rows="2"
+                                  class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                  placeholder="Add any specific experience or additional skills not listed above..."></textarea>
+                    </div>
+                    
+                    <p class="mt-3 text-sm text-gray-500">
+                        <span id="skill-count" class="font-semibold text-blue-600">0</span> skills selected. 
+                        Select at least one to continue.
+                    </p>
                 </div>
+                
+                <style>
+                    .skill-card {
+                        position: relative;
+                    }
+                    
+                    .skill-checkbox {
+                        position: absolute;
+                        opacity: 0;
+                        pointer-events: none;
+                    }
+                    
+                    .skill-label {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        padding: 1rem 0.5rem;
+                        border: 2px solid #e5e7eb;
+                        border-radius: 0.5rem;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                        background: white;
+                        text-align: center;
+                    }
+                    
+                    .skill-label:hover {
+                        border-color: #3b82f6;
+                        background: #eff6ff;
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                    }
+                    
+                    .skill-checkbox:checked + .skill-label {
+                        border-color: #3b82f6;
+                        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                        color: white;
+                        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+                    }
+                    
+                    .skill-icon {
+                        font-size: 2rem;
+                        margin-bottom: 0.5rem;
+                        filter: grayscale(50%);
+                        transition: all 0.2s ease;
+                    }
+                    
+                    .skill-checkbox:checked + .skill-label .skill-icon {
+                        filter: grayscale(0%) brightness(1.2);
+                        transform: scale(1.1);
+                    }
+                    
+                    .skill-name {
+                        font-size: 0.75rem;
+                        font-weight: 500;
+                        line-height: 1.2;
+                    }
+                    
+                    .skill-checkbox:checked + .skill-label .skill-name {
+                        font-weight: 600;
+                    }
+                </style>
+                
+                <script>
+                    // Update hidden input and counter when skills are selected
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const checkboxes = document.querySelectorAll('.skill-checkbox');
+                        const hiddenInput = document.getElementById('skills');
+                        const counter = document.getElementById('skill-count');
+                        
+                        function updateSkills() {
+                            const selected = Array.from(checkboxes)
+                                .filter(cb => cb.checked)
+                                .map(cb => cb.value);
+                            
+                            hiddenInput.value = selected.join(', ');
+                            counter.textContent = selected.length;
+                            
+                            // Add visual feedback
+                            if (selected.length > 0) {
+                                counter.classList.add('text-green-600');
+                                counter.classList.remove('text-blue-600');
+                            } else {
+                                counter.classList.add('text-blue-600');
+                                counter.classList.remove('text-green-600');
+                            }
+                        }
+                        
+                        checkboxes.forEach(checkbox => {
+                            checkbox.addEventListener('change', updateSkills);
+                        });
+                        
+                        // Initialize
+                        updateSkills();
+                    });
+                </script>
 
                 <div>
                     <label for="document" class="block text-sm font-medium text-gray-700">ID Verification Document</label>
